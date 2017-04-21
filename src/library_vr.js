@@ -76,12 +76,25 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_is_present: function() {
-    return WebVR.display !== null;
+    return WebVR.display && WebVR.display.isConnected;
   },
 
-  emscripten_vr_set_render_callback: function(callback, data) {
-    WebVR.render = callback;
-    WebVR.renderData = data;
+  emscripten_vr_get_display_name: function() {
+    if (!WebVR.display) {
+      return 0;
+    }
+
+    if (WebVR.displayName) {
+      return WebVR.displayName;
+    }
+
+    var str = WebVR.display.displayName;
+    var len = lengthBytesUTF8(str);
+
+    WebVR.displayName = _malloc(len + 1);
+    stringToUTF8(str, WebVR.displayName, len + 1);
+
+    return WebVR.displayName;
   },
 
   emscripten_vr_get_display_width: function() {
@@ -90,6 +103,107 @@ var LibraryWebVR = {
 
   emscripten_vr_get_display_height: function() {
     return WebVR.height;
+  },
+
+  emscripten_vr_get_display_clip_distance: function(near, far) {
+    if (!WebVR.display) {
+      Module.setValue(near, 0, 'float');
+      Module.setValue(far, 0, 'float');
+      return;
+    }
+
+    Module.setValue(near, WebVR.display.depthNear, 'float');
+    Module.setValue(far, WebVR.display.depthFar, 'float');
+  },
+
+  emscripten_vr_set_display_clip_distance: function(near, far) {
+    if (WebVR.display) {
+      WebVR.display.depthNear = near;
+      WebVR.display.depthFar = far;
+    }
+  },
+
+  emscripten_vr_get_bounds_width: function() {
+    var stage = WebVR.display && WebVR.display.stageParameters;
+    return stage ? stage.sizeX : 0;
+  },
+
+  emscripten_vr_get_bounds_depth: function() {
+    var stage = WebVR.display && WebVR.display.stageParameters;
+    return stage ? stage.sizeZ : 0;
+  },
+
+  emscripten_vr_get_position: function(x, y, z) {
+    if (!WebVR.display || !WebVR.frame) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, WebVR.frame.pose.position[0], 'float');
+    Module.setValue(y, WebVR.frame.pose.position[1], 'float');
+    Module.setValue(z, WebVR.frame.pose.position[2], 'float');
+  },
+
+  emscripten_vr_get_eye_offset: function(eye, x, y, z) {
+    if (!WebVR.display) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      return;
+    }
+
+    var eyeParams = WebVR.display.getEyeParameters(eye === 0 ? 'left' : 'right');
+    Module.setValue(x, eyeParams.offset[0], 'float');
+    Module.setValue(y, eyeParams.offset[1], 'float');
+    Module.setValue(z, eyeParams.offset[2], 'float');
+  },
+
+  emscripten_vr_get_orientation: function(x, y, z, w) {
+    if (!WebVR.display || !WebVR.frame) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      Module.setValue(w, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, WebVR.frame.pose.orientation[0], 'float');
+    Module.setValue(y, WebVR.frame.pose.orientation[1], 'float');
+    Module.setValue(z, WebVR.frame.pose.orientation[2], 'float');
+    Module.setValue(w, WebVR.frame.pose.orientation[3], 'float');
+  },
+
+  emscripten_vr_get_velocity: function(x, y, z) {
+    if (!WebVR.display || !WebVR.frame) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, WebVR.frame.pose.linearVelocity[0], 'float');
+    Module.setValue(y, WebVR.frame.pose.linearVelocity[1], 'float');
+    Module.setValue(z, WebVR.frame.pose.linearVelocity[2], 'float');
+  },
+
+  emscripten_vr_get_angular_velocity: function(x, y, z) {
+    if (!WebVR.display || !WebVR.frame) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, WebVR.frame.pose.angularVelocity[0], 'float');
+    Module.setValue(y, WebVR.frame.pose.angularVelocity[1], 'float');
+    Module.setValue(z, WebVR.frame.pose.angularVelocity[2], 'float');
+  },
+
+  emscripten_vr_set_render_callback: function(callback, data) {
+    WebVR.render = callback;
+    WebVR.renderData = data;
   },
 
   emscripten_vr_get_view_matrix: function(eye) {
