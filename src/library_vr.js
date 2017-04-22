@@ -100,7 +100,7 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_get_display_width: function() {
-    return WebVR.width / 2;
+    return WebVR.width;
   },
 
   emscripten_vr_get_display_height: function() {
