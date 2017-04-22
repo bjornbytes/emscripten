@@ -10,6 +10,7 @@ var LibraryWebVR = {
     frame: null,
     viewMatrix: null,
     projectionMatrix: null,
+    sittingToStandingMatrix: null,
 
     init: function() {
       if (WebVR.initialized) {
@@ -27,6 +28,7 @@ var LibraryWebVR = {
       WebVR.frame = new VRFrameData();
       WebVR.viewMatrix = Module._malloc(64);
       WebVR.projectionMatrix = Module._malloc(64);
+      WebVR.sittingToStandingMatrix = Module._malloc(64);
 
       navigator.getVRDisplays().then(function(displays) {
         var display = WebVR.display = displays[0];
@@ -208,7 +210,7 @@ var LibraryWebVR = {
 
   emscripten_vr_get_view_matrix: function(eye) {
     if (!WebVR.frame) {
-      return;
+      return 0;
     }
 
     HEAPF32.set(new Float32Array(eye === 0 ? WebVR.frame.leftViewMatrix : WebVR.frame.rightViewMatrix), WebVR.viewMatrix / 4);
@@ -218,12 +220,24 @@ var LibraryWebVR = {
 
   emscripten_vr_get_projection_matrix: function(eye) {
     if (!WebVR.frame) {
-      return;
+      return 0;
     }
 
     HEAPF32.set(new Float32Array(eye === 0 ? WebVR.frame.leftProjectionMatrix : WebVR.frame.rightProjectionMatrix), WebVR.projectionMatrix / 4);
 
     return WebVR.projectionMatrix;
+  },
+
+  emscripten_vr_get_sitting_to_standing_matrix: function() {
+    var stage = WebVR.display && WebVR.display.stageParameters;
+
+    if (!stage || !stage.sittingToStandingTransform) {
+      return 0;
+    }
+
+    HEAPF32.set(new Float32Array(stage.sittingToStandingTransform), WebVR.sittingToStandingMatrix / 4);
+
+    return WebVR.sittingToStandingMatrix;
   }
 };
 

@@ -32,6 +32,7 @@ extern void emscripten_vr_get_angular_velocity(float* x, float* y, float* z);
 extern void emscripten_vr_set_render_callback(em_arg_callback_func callback, void* data);
 extern float* emscripten_vr_get_view_matrix(int eye);
 extern float* emscripten_vr_get_projection_matrix(int eye);
+extern float* emscripten_vr_get_sitting_to_standing_matrix();
 
 #ifdef __cplusplus
 } // ~extern "C"
