@@ -53,11 +53,7 @@ var LibraryWebVR = {
         window.addEventListener('gamepaddisconnected', refreshControllers);
         refreshControllers();
 
-        document.onkeypress = function(event) {
-          if (event.charCode != 102) {
-            return;
-          }
-
+        window.addEventListener('lovr.entervr', function() {
           display.requestPresent([{ source: canvas }]).then(function() {
             var render = function() {
               if (display && display.isPresenting) {
@@ -75,7 +71,7 @@ var LibraryWebVR = {
 
             display.requestAnimationFrame(render);
           });
-        };
+        });
       });
 
       window.addEventListener('vrdisplaypresentchange', function() {
