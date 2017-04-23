@@ -2,6 +2,7 @@ var LibraryWebVR = {
   $WebVR: {
     initialized: false,
     display: null,
+    controllers: [],
     canvas: null,
     render: null,
     renderData: null,
@@ -36,6 +37,13 @@ var LibraryWebVR = {
         if (!display) {
           console.log('No displays found');
           return;
+        }
+
+        var controllers = navigator.getGamepads();
+        for (var i = 0; i < controllers.length; i++) {
+          if (controllers[i] && controllers[i].displayId === display.displayId && controllers[i].pose) {
+            WebVR.controllers.push(controllers[i]);
+          }
         }
 
         document.onkeypress = function(event) {
@@ -201,6 +209,42 @@ var LibraryWebVR = {
     Module.setValue(x, WebVR.frame.pose.angularVelocity[0], 'float');
     Module.setValue(y, WebVR.frame.pose.angularVelocity[1], 'float');
     Module.setValue(z, WebVR.frame.pose.angularVelocity[2], 'float');
+  },
+
+  emscripten_vr_get_controller_count: function() {
+    return WebVR.controllers.length;
+  },
+
+  emscripten_vr_get_controller_position: function(index, x, y, z) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller || !controller.pose || !controller.pose.position) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, controller.pose.position[0], 'float');
+    Module.setValue(y, controller.pose.position[1], 'float');
+    Module.setValue(z, controller.pose.position[2], 'float');
+  },
+
+  emscripten_vr_get_controller_orientation: function(index, x, y, z, w) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller || !controller.pose || !controller.pose.orientation) {
+      Module.setValue(x, 0, 'float');
+      Module.setValue(y, 0, 'float');
+      Module.setValue(z, 0, 'float');
+      Module.setValue(w, 0, 'float');
+      return;
+    }
+
+    Module.setValue(x, controller.pose.orientation[0], 'float');
+    Module.setValue(y, controller.pose.orientation[1], 'float');
+    Module.setValue(z, controller.pose.orientation[2], 'float');
+    Module.setValue(w, controller.pose.orientation[3], 'float');
   },
 
   emscripten_vr_set_render_callback: function(callback, data) {
