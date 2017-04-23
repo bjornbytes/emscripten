@@ -26,6 +26,8 @@ var LibraryWebVR = {
       }
 
       WebVR.canvas = document.querySelector('#canvas');
+      WebVR.width = canvas.width;
+      WebVR.height = canvas.height;
       WebVR.frame = new VRFrameData();
       WebVR.viewMatrix = Module._malloc(64);
       WebVR.projectionMatrix = Module._malloc(64);
@@ -53,24 +55,26 @@ var LibraryWebVR = {
         window.addEventListener('gamepaddisconnected', refreshControllers);
         refreshControllers();
 
-        window.addEventListener('lovr.entervr', function() {
-          display.requestPresent([{ source: canvas }]).then(function() {
-            var render = function() {
-              if (display && display.isPresenting) {
-                display.requestAnimationFrame(render);
-
-                display.getFrameData(WebVR.frame);
-
-                if (WebVR.render) {
-                  Runtime.dynCall('vi', WebVR.render, [WebVR.renderData]);
-                }
-
-                display.submitFrame();
-              }
-            };
-
+        var render = function() {
+          if (display) {
             display.requestAnimationFrame(render);
-          });
+
+            display.getFrameData(WebVR.frame);
+
+            if (WebVR.render) {
+              Runtime.dynCall('vi', WebVR.render, [WebVR.renderData]);
+            }
+
+            if (display.isPresenting) {
+              display.submitFrame();
+            }
+          }
+        };
+
+        display.requestAnimationFrame(render);
+
+        window.addEventListener('lovr.entervr', function() {
+          display.requestPresent([{ source: canvas }]);
         });
       });
 
