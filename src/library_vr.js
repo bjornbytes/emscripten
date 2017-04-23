@@ -257,7 +257,7 @@ var LibraryWebVR = {
       return 0;
     }
 
-    HEAPF32.set(new Float32Array(eye === 0 ? WebVR.frame.leftViewMatrix : WebVR.frame.rightViewMatrix), WebVR.viewMatrix / 4);
+    HEAPF32.set(eye === 0 ? WebVR.frame.leftViewMatrix : WebVR.frame.rightViewMatrix, WebVR.viewMatrix / 4);
 
     return WebVR.viewMatrix;
   },
@@ -267,7 +267,7 @@ var LibraryWebVR = {
       return 0;
     }
 
-    HEAPF32.set(new Float32Array(eye === 0 ? WebVR.frame.leftProjectionMatrix : WebVR.frame.rightProjectionMatrix), WebVR.projectionMatrix / 4);
+    HEAPF32.set(eye === 0 ? WebVR.frame.leftProjectionMatrix : WebVR.frame.rightProjectionMatrix, WebVR.projectionMatrix / 4);
 
     return WebVR.projectionMatrix;
   },
@@ -279,7 +279,7 @@ var LibraryWebVR = {
       return 0;
     }
 
-    HEAPF32.set(new Float32Array(stage.sittingToStandingTransform), WebVR.sittingToStandingMatrix / 4);
+    HEAPF32.set(stage.sittingToStandingTransform, WebVR.sittingToStandingMatrix / 4);
 
     return WebVR.sittingToStandingMatrix;
   }
