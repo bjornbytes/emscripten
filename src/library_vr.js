@@ -39,12 +39,19 @@ var LibraryWebVR = {
           return;
         }
 
-        var controllers = navigator.getGamepads();
-        for (var i = 0; i < controllers.length; i++) {
-          if (controllers[i] && controllers[i].displayId === display.displayId && controllers[i].pose) {
-            WebVR.controllers.push(controllers[i]);
+        var refreshControllers = function() {
+          WebVR.controllers = [];
+          var controllers = navigator.getGamepads();
+          for (var i = 0; i < controllers.length; i++) {
+            if (controllers[i] && controllers[i].pose) {
+              WebVR.controllers.push(controllers[i]);
+            }
           }
-        }
+        };
+
+        window.addEventListener('gamepadconnected', refreshControllers);
+        window.addEventListener('gamepaddisconnected', refreshControllers);
+        refreshControllers();
 
         document.onkeypress = function(event) {
           if (event.charCode != 102) {
@@ -215,6 +222,16 @@ var LibraryWebVR = {
     return WebVR.controllers.length;
   },
 
+  emscripten_vr_controller_is_present: function(index) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller || !controller.connected) {
+      return 0;
+    }
+
+    return 1;
+  },
+
   emscripten_vr_get_controller_position: function(index, x, y, z) {
     var controller = WebVR.controllers[index];
 
@@ -245,6 +262,41 @@ var LibraryWebVR = {
     Module.setValue(y, controller.pose.orientation[1], 'float');
     Module.setValue(z, controller.pose.orientation[2], 'float');
     Module.setValue(w, controller.pose.orientation[3], 'float');
+  },
+
+  emscripten_vr_controller_get_axis: function(index, axis) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller) {
+      return 0;
+    }
+
+    // Triggered.
+    if (axis === -1) {
+      return controller.buttons[1].value;
+    }
+
+    return controller.axes[axis];
+  },
+
+  emscripten_vr_controller_is_down: function(index, button) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller) {
+      return 0;
+    }
+
+    return controller.buttons[button] && controller.buttons[button].pressed;
+  },
+
+  emscripten_vr_controller_vibrate: function(index, duration, power) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller || !controller.hapticActuators || !controller.hapticActuators[0]) {
+      return;
+    }
+
+    controller.hapticActuators[0].pulse(power, duration);
   },
 
   emscripten_vr_set_render_callback: function(callback, data) {
