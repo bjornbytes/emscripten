@@ -25,7 +25,10 @@ var LibraryWebVR = {
         return;
       }
 
-      WebVR.canvas = document.querySelector('#canvas');
+      var canvas = WebVR.canvas = document.querySelector('#canvas');
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+
       WebVR.width = canvas.width;
       WebVR.height = canvas.height;
       WebVR.frame = new VRFrameData();
@@ -74,7 +77,15 @@ var LibraryWebVR = {
         display.requestAnimationFrame(render);
 
         window.addEventListener('lovr.entervr', function() {
-          display.requestPresent([{ source: canvas }]);
+          if (!display.isPresenting) {
+            display.requestPresent([{ source: canvas }]);
+          }
+        });
+
+        window.addEventListener('lovr.exitvr', function() {
+          if (display.isPresenting) {
+            display.exitPresent();
+          }
         });
       });
 
@@ -151,7 +162,7 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_get_position: function(x, y, z) {
-    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose.position) {
+    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose || !WebVR.frame.pose.position) {
       Module.setValue(x, 0, 'float');
       Module.setValue(y, 0, 'float');
       Module.setValue(z, 0, 'float');
@@ -178,7 +189,7 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_get_orientation: function(x, y, z, w) {
-    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose.orientation) {
+    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose || !WebVR.frame.pose.orientation) {
       Module.setValue(x, 0, 'float');
       Module.setValue(y, 0, 'float');
       Module.setValue(z, 0, 'float');
@@ -193,7 +204,7 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_get_velocity: function(x, y, z) {
-    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose.linearVelocity) {
+    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose || !WebVR.frame.pose.linearVelocity) {
       Module.setValue(x, 0, 'float');
       Module.setValue(y, 0, 'float');
       Module.setValue(z, 0, 'float');
@@ -206,7 +217,7 @@ var LibraryWebVR = {
   },
 
   emscripten_vr_get_angular_velocity: function(x, y, z) {
-    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose.angularVelocity) {
+    if (!WebVR.display || !WebVR.frame || !WebVR.frame.pose || !WebVR.frame.pose.angularVelocity) {
       Module.setValue(x, 0, 'float');
       Module.setValue(y, 0, 'float');
       Module.setValue(z, 0, 'float');
