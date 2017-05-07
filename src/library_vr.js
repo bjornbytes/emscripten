@@ -9,6 +9,7 @@ var LibraryWebVR = {
     width: 0,
     height: 0,
     frame: null,
+    identityMatrix: null,
     viewMatrix: null,
     projectionMatrix: null,
     sittingToStandingMatrix: null,
@@ -32,6 +33,7 @@ var LibraryWebVR = {
       WebVR.width = canvas.width;
       WebVR.height = canvas.height;
       WebVR.frame = new VRFrameData();
+      WebVR.identityMatrix = Float32Array.from([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
       WebVR.viewMatrix = Module._malloc(64);
       WebVR.projectionMatrix = Module._malloc(64);
       WebVR.sittingToStandingMatrix = Module._malloc(64);
@@ -337,12 +339,13 @@ var LibraryWebVR = {
 
   emscripten_vr_get_sitting_to_standing_matrix: function() {
     var stage = WebVR.display && WebVR.display.stageParameters;
+    var matrix = stage
 
     if (!stage || !stage.sittingToStandingTransform) {
-      return 0;
+      HEAPF32.set(WebVR.identityMatrix, WebVR.sittingToStandingMatrix / 4);
+    } else {
+      HEAPF32.set(stage.sittingToStandingTransform, WebVR.sittingToStandingMatrix / 4);
     }
-
-    HEAPF32.set(stage.sittingToStandingTransform, WebVR.sittingToStandingMatrix / 4);
 
     return WebVR.sittingToStandingMatrix;
   }
