@@ -27,8 +27,16 @@ var LibraryWebVR = {
       }
 
       var canvas = WebVR.canvas = document.querySelector('#canvas');
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+
+      function onResize() {
+        if (!WebVR.display || !WebVR.display.isPresenting) {
+          canvas.width = WebVR.width = canvas.parentElement.offsetWidth * window.devicePixelRatio;
+          canvas.height = WebVR.height = canvas.parentElement.offsetHeight * window.devicePixelRatio;
+        }
+      }
+
+      window.addEventListener('resize', onResize);
+      onResize();
 
       WebVR.width = canvas.width;
       WebVR.height = canvas.height;
@@ -76,6 +84,7 @@ var LibraryWebVR = {
           }
         };
 
+        onResize();
         display.requestAnimationFrame(render);
 
         window.addEventListener('lovr.entervr', function() {
@@ -348,6 +357,10 @@ var LibraryWebVR = {
     }
 
     return WebVR.sittingToStandingMatrix;
+  },
+
+  emscripten_vr_has_stage: function() {
+    return WebVR.display && WebVR.display.stageParameters !== null;
   }
 };
 
