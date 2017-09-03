@@ -254,6 +254,22 @@ var LibraryWebVR = {
     return 1;
   },
 
+  emscripten_vr_controller_get_hand: function(index) {
+    var controller = WebVR.controllers[index];
+
+    if (!controller || !controller.connected) {
+      return 0;
+    }
+
+    var hands = {
+      '': 0,
+      'left': 1,
+      'right': 2
+    };
+
+    return hands[controller.hand] || 0;
+  },
+
   emscripten_vr_get_controller_position: function(index, x, y, z) {
     var controller = WebVR.controllers[index];
 

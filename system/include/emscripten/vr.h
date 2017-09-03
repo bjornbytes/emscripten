@@ -31,6 +31,7 @@ extern void emscripten_vr_get_velocity(float* x, float* y, float* z);
 extern void emscripten_vr_get_angular_velocity(float* x, float* y, float* z);
 extern int emscripten_vr_get_controller_count(void);
 extern int emscripten_vr_controller_is_present(int index);
+extern int emscripten_vr_controller_get_hand(int index);
 extern void emscripten_vr_get_controller_position(int index, float* x, float* y, float* z);
 extern void emscripten_vr_get_controller_orientation(int index, float* x, float* y, float* z, float* w);
 extern float emscripten_vr_controller_get_axis(int index, int axis);
